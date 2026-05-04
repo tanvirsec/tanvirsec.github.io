@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome Bro</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Courier New', monospace;
+    }
+
+    body {
+      background: #0a0a0a;
+      color: #eaeaea;
+    }
+
+    header {
+      padding: 40px 20px;
+      text-align: center;
+      border-bottom: 1px solid #222;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      color: #00ff9f;
+    }
+
+    .profile {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin: 15px 0;
+      border: 2px solid #00ff9f;
+      box-shadow: 0 0 15px #00ff9f33;
+    }
+
+    header p {
+      color: #aaa;
+      margin-top: 10px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 30px 20px;
+    }
+
+    .section {
+      margin-bottom: 50px;
+    }
+
+    .section h2 {
+      color: #00ff9f;
+      margin-bottom: 15px;
+      border-left: 3px solid #00ff9f;
+      padding-left: 10px;
+    }
+
+    .about {
+      color: #ccc;
+      line-height: 1.6;
+    }
+
+    .skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .skill {
+      border: 1px solid #00ff9f;
+      padding: 5px 10px;
+      font-size: 0.9rem;
+      color: #00ff9f;
+    }
+
+    .projects {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .project {
+      background: #111;
+      border: 1px solid #222;
+      padding: 10px;
+      transition: 0.3s;
+    }
+
+    .project:hover {
+      transform: scale(1.03);
+      border-color: #00ff9f;
+    }
+
+    .project img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+
+    .project p {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      border-top: 1px solid #222;
+      color: #777;
+    }
+
+    a {
+      color: #00ff9f;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>TanvirSec</h1>
+
+  <img src="profile.jpg" alt="profile" class="profile">
+
+  <p>OSINT Explorer | Tool Builder</p>
+</header>
+
+<div class="container">
+
+  <div class="section">
+    <h2>About</h2>
+    <p class="about">
+      Hai, aku Tanvir, 19 tahun. Suka eksplorasi dunia digital dan real life.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Hoby</h2>
+    <div class="skills">
+      <div class="skill">OSINT</div>
+      <div class="skill">GAMING</div>
+      <div class="skill">MUSIC</div>
+      <div class="skill">NATURE</div>
+      <div class="skill">MOMENTS</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Projects</h2>
+    <div class="projects">
+
+      <div class="project">
+        <img src="gambar1.jpg">
+        <p>OSINT Tool / Tracking Experiment</p>
+      </div>
+
+      <div class="project">
+        <img src="gambar2.jpg">
+        <p>Data Analysis / Investigation Result</p>
+      </div>
+
+      <div class="project">
+        <img src="gambar3.jpg">
+        <p>Digital Forensics / Research Project</p>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p>Contact: <a href="mailto:emailkamu@gmail.com">emailkamu@gmail.com</a></p>
+  <p>© 2026 TanvirSec</p>
+</footer>
+
+</body>
+</html>
