@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>LARA</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif;-webkit-tap-highlight-color:transparent}
+  body{
+    background:#0a0a0a;min-height:100vh;color:#e0e0e0;
+    display:flex;flex-direction:column;align-items:center;padding:20px 14px 40px;
+  }
+  .brand{
+    font-size:34px;font-weight:900;letter-spacing:8px;
+    background:linear-gradient(180deg,#ff2e3f,#8a0010);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 0 30px rgba(255,46,63,.4);
+    margin-bottom:4px;text-align:center;
+  }
+  .brand-sub{
+    color:#666;font-size:11px;letter-spacing:3px;margin-bottom:22px;
+    text-transform:uppercase;
+  }
+  .card{
+    background:#141414;border:1px solid #2a0a0e;border-radius:14px;
+    width:100%;max-width:420px;padding:20px;
+    box-shadow:0 0 40px rgba(255,46,63,.08),inset 0 1px 0 rgba(255,255,255,.03);
+  }
+  label{display:block;color:#888;font-size:12px;margin-bottom:8px;letter-spacing:1px}
+  input{
+    width:100%;padding:14px 16px;background:#0a0a0a;
+    border:1px solid #2a0a0e;border-radius:10px;color:#fff;
+    font-size:18px;letter-spacing:2px;outline:none;transition:.2s;
+    font-family:'Courier New',monospace;
+  }
+  input:focus{border-color:#ff2e3f;box-shadow:0 0 0 3px rgba(255,46,63,.12)}
+  input::placeholder{color:#444;letter-spacing:1px}
+  button{
+    width:100%;margin-top:14px;padding:14px;border:none;border-radius:10px;
+    background:linear-gradient(135deg,#ff2e3f,#8a0010);color:#fff;
+    font-weight:800;font-size:15px;letter-spacing:2px;cursor:pointer;
+    transition:.15s;text-transform:uppercase;
+  }
+  button:active{transform:scale(.97);filter:brightness(1.2)}
+  button:disabled{opacity:.6;cursor:wait}
+  .result{margin-top:18px;display:none}
+  .result.show{display:block;animation:fade .3s}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .row{
+    display:flex;justify-content:space-between;gap:10px;
+    padding:10px 12px;border-bottom:1px solid #1e1e1e;font-size:13px;
+  }
+  .row:last-child{border-bottom:none}
+  .row .k{color:#777;flex-shrink:0}
+  .row .v{color:#fff;text-align:right;font-weight:600;word-break:break-word}
+  .section-title{
+    color:#ff2e3f;font-size:11px;letter-spacing:3px;
+    margin:14px 0 6px;text-transform:uppercase;font-weight:700;
+    border-left:3px solid #ff2e3f;padding-left:8px;
+  }
+  .err{
+    background:#2a0008;border:1px solid #ff2e3f;border-radius:10px;
+    padding:14px;text-align:center;color:#ff6677;font-weight:700;
+    margin-top:14px;display:none;font-size:13px;letter-spacing:1px;
+  }
+  .err.show{display:block;animation:shake .4s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .footer{margin-top:26px;color:#444;font-size:11px;letter-spacing:2px;text-align:center}
+  .footer b{color:#ff2e3f}
+  .loading{
+    text-align:center;color:#666;font-size:12px;letter-spacing:2px;
+    margin-top:14px;display:none;
+  }
+  .loading.show{display:block}
+</style>
+</head>
+<body>
+
+<div class="brand">LARA</div>
+<div class="brand-sub">EXTRACT NIK</div>
+
+<div class="card">
+  <label>NOMOR INDUK KEPENDUDUKAN</label>
+  <input id="nik" type="tel" inputmode="numeric" maxlength="16" placeholder="16 digit NIK">
+  <button id="btn">PARSE</button>
+
+  <div class="loading" id="loading">MEMUAT DATA DAERAH...</div>
+  <div class="err" id="err">NIK TIDAK VALID</div>
+  <div class="result" id="res"></div>
+</div>
+
+<div class="footer">Copyright &copy; <b>365 Society</b></div>
+
+<script>
+// ============================================================
+// LOAD DATA DARI daerah.json
+// ============================================================
+let DB = null;
+let dbReady = false;
+
+async function loadDB() {
+  try {
+    const res = await fetch('daerah.json');
+    if (!res.ok) throw new Error('Gagal fetch daerah.json');
+    DB = await res.json();
+    dbReady = true;
+    console.log('✅ Data daerah.json dimuat:', DB.length, 'provinsi');
+  } catch (e) {
+    console.error('❌ Gagal memuat daerah.json:', e);
+    showErr('GAGAL MEMUAT DATA DAERAH');
+  }
+}
+
+// ============================================================
+// LOOKUP WILAYAH DARI NIK
+// ============================================================
+function lookupNIK(nik) {
+  const provCode = nik.substring(0, 2);
+  const kabCode  = nik.substring(0, 4);
+  const kecCode  = nik.substring(0, 7);
+  const desaCode = nik.substring(0, 10);
+
+  let hasil = {
+    provinsi: null,
+    kabupaten: null,
+    kecamatan: null,
+    desa: null,
+    kode: { prov: provCode, kab: kabCode, kec: kecCode, desa: desaCode }
+  };
+
+  for (const prov of DB) {
+    if (prov.id === provCode) {
+      hasil.provinsi = prov.name;
+      if (!prov.regencies) break;
+
+      for (const kab of prov.regencies) {
+        if (kab.id === kabCode) {
+          hasil.kabupaten = kab.name;
+          if (!kab.districts) break;
+
+          for (const kec of kab.districts) {
+            if (kec.id === kecCode) {
+              hasil.kecamatan = kec.name;
+              if (!kec.villages) break;
+
+              for (const desa of kec.villages) {
+                if (desa.id === desaCode) {
+                  hasil.desa = desa.name;
+                  break;
+                }
+              }
+              break;
+            }
+          }
+          break;
+        }
+      }
+      break;
+    }
+  }
+  return hasil;
+}
+
+// ============================================================
+// UI HELPERS
+// ============================================================
+const $nik = document.getElementById('nik');
+const $btn = document.getElementById('btn');
+const $res = document.getElementById('res');
+const $err = document.getElementById('err');
+const $loading = document.getElementById('loading');
+
+function showErr(msg) {
+  $err.textContent = msg;
+  $err.classList.add('show');
+  $res.classList.remove('show');
+  setTimeout(() => $err.classList.remove('show'), 2500);
+}
+
+function renderResult(d) {
+  const { provinsi, kabupaten, kecamatan, desa, kode } = d;
+
+  let html = '';
+  html += `<div class="section-title">KODE WILAYAH</div>`;
+  html += `<div class="row"><span class="k">Provinsi</span><span class="v">${kode.prov}</span></div>`;
+  html += `<div class="row"><span class="k">Kab/Kota</span><span class="v">${kode.kab}</span></div>`;
+  html += `<div class="row"><span class="k">Kecamatan</span><span class="v">${kode.kec}</span></div>`;
+  html += `<div class="row"><span class="k">Desa</span><span class="v">${kode.desa}</span></div>`;
+
+  html += `<div class="section-title">WILAYAH</div>`;
+  html += `<div class="row"><span class="k">Provinsi</span><span class="v">${provinsi || '—'}</span></div>`;
+  html += `<div class="row"><span class="k">Kab/Kota</span><span class="v">${kabupaten || '—'}</span></div>`;
+  html += `<div class="row"><span class="k">Kecamatan</span><span class="v">${kecamatan || '—'}</span></div>`;
+  html += `<div class="row"><span class="k">Desa</span><span class="v">${desa || '—'}</span></div>`;
+
+  $res.innerHTML = html;
+  $res.classList.add('show');
+}
+
+// ============================================================
+// HANDLER
+// ============================================================
+$btn.addEventListener('click', () => {
+  if (!dbReady) {
+    showErr('DATA BELUM SIAP, TUNGGU SEBENTAR');
+    return;
+  }
+  const nik = $nik.value.trim();
+  if (!/^\d{16}$/.test(nik)) {
+    showErr('NIK HARUS 16 DIGIT ANGKA');
+    return;
+  }
+  const hasil = lookupNIK(nik);
+  renderResult(hasil);
+});
+
+$nik.addEventListener('input', e => {
+  e.target.value = e.target.value.replace(/\D/g, '').slice(0, 16);
+});
+
+$nik.addEventListener('keypress', e => {
+  if (e.key === 'Enter') $btn.click();
+});
+
+// ============================================================
+// INIT
+// ============================================================
+(async () => {
+  $loading.classList.add('show');
+  $btn.disabled = true;
+  await loadDB();
+  $loading.classList.remove('show');
+  $btn.disabled = false;
+})();
+</script>
+</body>
+</html>
